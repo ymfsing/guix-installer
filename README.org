@@ -1,6 +1,6 @@
 #+title: Installing Guix as a Complete GNU/Linux System
 
-[[https://youtu.be/oSy-TmoxG_Y][Watch the video]] on YouTube!
+[[https://youtu.be/oSy-TmoxG_Y][Watch this video]] on YouTube!
 
 * The time has come!
 
@@ -26,9 +26,7 @@ I'll point out any deviations from the official installer when we reach them.
 
 First of all, you'll need to download the =.iso= file for the latest release on this GitHub repository:
 
-https://github.com/SystemCrafters/guix-installer/releases/latest
-
-I'll be using [[https://github.com/SystemCrafters/guix-installer/releases/tag/v202106122242][this release]] of the installer today but it's probably better to try the latest version first and then use the one I'm using if you run into any trouble with the newest one.
+https://github.com/ymfsing/guix-installer/releases/latest
 
 You'll then need to burn the ISO onto either a DVD or USB stick.  You can follow the instructions in the GNU Guix manual for how to burn the ISO once you've downloaded it (just don't download the ISO that they recommend!)
 
@@ -38,8 +36,8 @@ An example:
 
 #+begin_src sh
 
-  $ sudo dd if=guix-installer-<date number>.iso of=/dev/sdX status=progress
-  $ sync
+$ sudo dd if=guix-installer-<date number>.iso of=/dev/sdX status=progress
+$ sync
 
 #+end_src
 
@@ -161,30 +159,30 @@ Now we can edit the generated configuration file to add the parts we need to ins
 
 #+begin_src sh
 
-  emacs /mnt/etc/config.scm
+vim /mnt/etc/config.scm
 
 #+end_src
 
-The first edit will be on the first =use-modules= line (line 4), replace it with the following:
+The first edit will be on the first =use-modules= line, replace it with the following:
 
 #+begin_src scheme
 
-  (use-modules (gnu) (nongnu packages linux))
+(use-modules (gnu) (nongnu packages linux))
 
 #+end_src
 
-The next section of the file (line 7) starts with =(operating-system=, we need to insert a couple lines just after that line:
+The next section of the file starts with =(operating-system=, we need to insert a couple lines just after that line:
 
 #+begin_src scheme
 
-  (kernel linux)
-  (firmware (list linux-firmware))  ; Don't forget the second parentheses at the end!
+(kernel linux)
+(firmware (list linux-firmware))  ; Don't forget the second parentheses at the end!
 
 #+end_src
 
 These two lines will set up the full Linux kernel and firmware in the installed system.
 
-That's it!  Save the file (~C-x C-s~ in Emacs) and then exit (~C-x C-c~).
+That's it!  Save the file and then exit.
 
 * Installing the system
 
@@ -194,7 +192,7 @@ First we need to set up the Guix build daemon to target the new system partition
 
 #+begin_src sh
 
-  herd start cow-store /mnt
+herd start cow-store /mnt
 
 #+end_src
 
@@ -202,16 +200,26 @@ We also want to save the channel configuration that was used to produce the inst
 
 #+begin_src sh
 
-  cp /etc/channels.scm /mnt/etc/
-  chmod +w /mnt/etc/channels.scm
+cp /etc/channels.scm /mnt/etc/
+chmod +w /mnt/etc/channels.scm
 
 #+end_src
 
-The following command will install your system configuration using the included =channels.scm= file so that you get both the main Guix channel and the Nonguix channel which contains the full Linux kernel:
+We also should set proxy for terminal:
+
+#+BEGIN_SRC sh
+
+export http_proxy=http://192.168.1.100:8080
+export https_proxy=http://192.168.1.100:8080
+export all_proxy=socks5://192.168.1.100:8080
+
+#+END_SRC
+
+The following command will install your system configuration using the included =channels.scm= file with setting substitutes so that you get both the main Guix channel and the Nonguix channel which contains the full Linux kernel:
 
 #+begin_src sh
 
-  guix time-machine -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt
+guix time-machine --substitute-urls="https://bordeaux.guix.gnu.org https://mirror.sjtu.edu.cn/guix/" -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt
 
 #+end_src
 
@@ -221,7 +229,7 @@ Once everything is done, type the following command to restart the computer:
 
 #+begin_src sh
 
-  reboot
+reboot
 
 #+end_src
 
@@ -239,11 +247,11 @@ Use ~Ctrl+Alt+F5~ to switch to another virtual terminal and log in as =root=.  N
 
 #+begin_src sh
 
-  # Change the root password
-  passwd
+# Change the root password
+passwd
 
-  # Change your user account password
-  passwd daviwil
+# Change your user account password
+passwd username
 
 #+end_src
 
@@ -259,11 +267,11 @@ You can save these files with the following commands:
 
 #+begin_src sh
 
-  mkdir -p ~/.config/guix
-  cd ~/.config/guix
-  cp /etc/channels.scm .
-  cp /etc/config.scm ./system.scm
-  chmod +w channels.scm
+mkdir -p ~/.config/guix
+cd ~/.config/guix
+cp /etc/channels.scm .
+cp /etc/config.scm ./system.scm
+chmod +w channels.scm
 
 #+end_src
 
@@ -273,22 +281,22 @@ The file should now look like this:
 
 #+begin_src scheme
 
-  (list (channel
-          (name 'guix)
-          (url "https://git.savannah.gnu.org/git/guix.git")
-          (introduction
-            (make-channel-introduction
-              "9edb3f66fd807b096b48283debdcddccfea34bad"
-              (openpgp-fingerprint
-                "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
-        (channel
-          (name 'nonguix)
-          (url "https://gitlab.com/nonguix/nonguix")
-          (introduction
-            (make-channel-introduction
-              "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-              (openpgp-fingerprint
-                "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))
+(list (channel
+       (name 'guix)
+       (url "https://git.savannah.gnu.org/git/guix.git")
+       (introduction
+        (make-channel-introduction
+         "9edb3f66fd807b096b48283debdcddccfea34bad"
+         (openpgp-fingerprint
+          "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+      (channel
+       (name 'nonguix)
+       (url "https://gitlab.com/nonguix/nonguix")
+       (introduction
+        (make-channel-introduction
+         "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+         (openpgp-fingerprint
+          "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))
 
 #+end_src
 
@@ -300,12 +308,16 @@ You can update your Guix system by running the following commands:
 
 #+begin_src sh
 
-  guix pull
-  sudo -E guix system reconfigure ~/.config/guix/system.scm
+guix pull
+sudo -E guix system reconfigure ~/.config/guix/system.scm
 
 #+end_src
 
 This may take some time depending on how many changes were made to Guix since your installer image was generated.  Once the =guix system reconfigure= command is done, you can reboot to use your updated system!
+
+* Updating guix channel with pinning
+
+We use ~update-channel.sh~ in install directory for pinning the guix channel.
 
 * Usage tips
 
