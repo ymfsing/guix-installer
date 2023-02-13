@@ -205,13 +205,14 @@ chmod +w /mnt/etc/channels.scm
 
 #+end_src
 
-We also should set proxy for terminal:
+We also should set proxy for terminal and set substitute url:
 
 #+BEGIN_SRC sh
 
 export http_proxy=http://192.168.1.100:8080
 export https_proxy=http://192.168.1.100:8080
-export all_proxy=socks5://192.168.1.100:8080
+
+export GUIX_BUILD_OPTIONS="--substitute-urls=https://bordeaux.guix.gnu.org https://mirror.sjtu.edu.cn/guix/"
 
 #+END_SRC
 
@@ -219,7 +220,7 @@ The following command will install your system configuration using the included 
 
 #+begin_src sh
 
-guix time-machine --substitute-urls="https://bordeaux.guix.gnu.org https://mirror.sjtu.edu.cn/guix/" -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt
+guix time-machine -C /mnt/etc/channels.scm -- system init /mnt/etc/config.scm /mnt
 
 #+end_src
 
