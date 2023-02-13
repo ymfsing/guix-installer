@@ -22,6 +22,11 @@ jobs:
       - name: Install Guix
         uses: PromyLOPh/guix-install-action@v1
 
+      - name: Add nonguix key
+        run: |
+          # Restart guix daemon
+          sudo guix archive --authorize < './guix/key.pub'
+
       - name: Build ISO
         run: |
 
@@ -29,7 +34,7 @@ jobs:
           guix time-machine -C './guix/base-channels.scm' -- describe -f channels > './guix/channels.scm'
 
           # Build the image
-          image=$(guix time-machine -C './guix/channels.scm' -- system image -t iso9660 './guix/installer.scm')
+          image=$(guix time-machine -C './guix/channels.scm' -- system image -t iso9660 --substitute-urls='https://substitutes.nonguix.org https://bordeaux.guix.gnu.org https://ci.guix.gnu.org' './guix/installer.scm')
 
           # Copy the image to the local folder with a better name
           export RELEASE_TAG=$(date +"%Y%m%d%H%M")
@@ -66,4 +71,3 @@ jobs:
           # delete_tag_pattern: beta # defaults to ""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
