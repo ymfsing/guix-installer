@@ -212,7 +212,7 @@ We also should set proxy for terminal and set substitute url:
 export http_proxy=http://192.168.1.100:8080
 export https_proxy=http://192.168.1.100:8080
 
-export GUIX_BUILD_OPTIONS="--substitute-urls=https://bordeaux.guix.gnu.org https://mirror.sjtu.edu.cn/guix/"
+export GUIX_BUILD_OPTIONS="--substitute-urls=https://bordeaux.guix.gnu.org"
 
 #+END_SRC
 
