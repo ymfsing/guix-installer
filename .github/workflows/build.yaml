@@ -24,8 +24,7 @@ jobs:
 
       - name: Add nonguix key
         run: |
-          # Restart guix daemon
-          sudo guix archive --authorize < './guix/key.pub'
+          guix archive --authorize < './guix/key.pub'
 
       - name: Build ISO
         run: |
