@@ -22,9 +22,9 @@ jobs:
       - name: Install Guix
         uses: ymfsing/guix-install-action@v1
 
-      - name: Add nonguix key
-        run: |
-          sudo guix archive --authorize < './guix/key.pub'
+      # - name: Add nonguix key
+      #   run: |
+      #     sudo guix archive --authorize < './guix/key.pub'
 
       - name: Build ISO
         run: |
